@@ -3,6 +3,10 @@ var fs = require('fs');
 
 var methods = Object.create(null);
 
+function urlToPath(url) {
+  var path = require("url").parse(url).pathname;
+  return "." + decodeURIComponent(path);
+
 http.createServer(function(request, response){
   function respond(code, body, type){
     if (!type) type = 'text/plain';
