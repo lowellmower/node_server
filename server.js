@@ -23,6 +23,15 @@ function urlToPath(url) {
   return "." + decodeURIComponent(path);
 }
 
+function respondErrorOrNothing(respond) {
+  return function(error) {
+    if (error)
+      respond(500, error.toString());
+    else
+      respond(204);
+  };
+}
+
 // RETURN CORRECT ERROR ON GET
 methods.GET = function(path, respond){
   fs.stat(path, function(error, stats){
