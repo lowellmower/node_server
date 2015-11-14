@@ -1,11 +1,6 @@
 var http = require('http');
 var fs = require('fs');
-
 var methods = Object.create(null);
-
-function urlToPath(url) {
-  var path = require("url").parse(url).pathname;
-  return "." + decodeURIComponent(path);
 
 http.createServer(function(request, response){
   function respond(code, body, type){
@@ -22,6 +17,10 @@ http.createServer(function(request, response){
     respond(405, 'Method ' + request.method + ' not allowed.');
   }
 }).listen(8000);
+
+function urlToPath(url) {
+  var path = require("url").parse(url).pathname;
+  return "." + decodeURIComponent(path);
 }
 
 // RETURN CORRECT ERROR ON GET
@@ -40,5 +39,19 @@ methods.GET = function(path, respond){
       });
     else
       respond(200, fs.createReadStream(path), require('mime').lookup(path));
+  });
+};
+
+// RETURN CORRECT ERRORS ON DELETE
+methods.DELETE = function(path, respond) {
+  fs.stat(path, function(error, stats) {
+    if (error && error.code == "ENOENT")
+      respond(204);
+    else if (error)
+      respond(500, error.toString());
+    else if (stats.isDirectory())
+      fs.rmdir(path, respondErrorOrNothing(respond));
+    else
+      fs.unlink(path, respondErrorOrNothing(respond));
   });
 };
