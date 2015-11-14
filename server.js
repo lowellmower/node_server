@@ -19,3 +19,22 @@ http.createServer(function(request, response){
   }
 }).listen(8000);
 }
+
+// RETURN CORRECT ERROR ON GET
+methods.GET = function(path, respond){
+  fs.stat(path, function(error, stats){
+    if (error && error.code == "ENOENT")
+      respond(404, 'File not found');
+    else if (error)
+      respond(500, error.toSting());
+    else if (stats.isDirectory())
+      fs.readdir(path, function(error, files){
+      if (error)
+        respond(500, error.toSting());
+      else
+        respond(200, files.join('\n'));
+      });
+    else
+      respond(200, fs.createReadStream(path), require('mime').lookup(path));
+  });
+};
