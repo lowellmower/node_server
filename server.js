@@ -32,7 +32,7 @@ function respondErrorOrNothing(respond) {
   };
 }
 
-// RETURN CORRECT ERROR ON GET
+// HANDLER FOR GET REQUESTS
 methods.GET = function(path, respond){
   fs.stat(path, function(error, stats){
     if (error && error.code == "ENOENT")
@@ -51,7 +51,7 @@ methods.GET = function(path, respond){
   });
 };
 
-// RETURN CORRECT ERRORS ON DELETE
+// HANDLER FOR DELETE REQUESTS
 methods.DELETE = function(path, respond) {
   fs.stat(path, function(error, stats) {
     if (error && error.code == "ENOENT")
@@ -64,3 +64,15 @@ methods.DELETE = function(path, respond) {
       fs.unlink(path, respondErrorOrNothing(respond));
   });
 };
+
+// HANDLER FOR PUT REQUESTS
+methods.PUT = function(path, respond, request){
+  var outStream = fs.createWriteStream(path);
+  outStream.on('error', function(error){
+    respond(500, error.toString());
+  });
+  outStream.on('finish', function(){
+    respond(204);
+  });
+  request.pipe(outStream);
+}
